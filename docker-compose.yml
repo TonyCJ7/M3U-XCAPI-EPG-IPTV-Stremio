@@ -1,21 +1,28 @@
-version: '3.8'
 services:
-  stremio_addon:
-    image: inside4ndroid/stremio-m3u-epg-addon:latest  # Changed from build: .
-    container_name: stremio_addon
-    ports:
-      - "7000:7000"
+  addon:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: stremio-iptv-addon:latest
+    container_name: iptv
+    restart: unless-stopped
     env_file:
       - .env
-    restart: unless-stopped
-    # Uncomment below if you want to use Redis
-    # depends_on:
-    #   - redis
+    networks:
+      - traefik-public
+      - vpn_network
+      - cache_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.iptv-addon.rule=Host(`iptv-sandbox.duckdns.org`)"
+      - "traefik.http.routers.iptv-addon.entrypoints=websecure"
+      - "traefik.http.routers.iptv-addon.tls.certresolver=letsencrypt"
+      - "traefik.http.services.iptv-addon.loadbalancer.server.port=7000"
 
-  # Optional Redis service
-  # redis:
-  #   image: redis:7-alpine
-  #   container_name: redis
-  #   ports:
-  #     - "6379:6379"
-  #   restart: unless-stopped
+networks:
+  traefik-public:
+    external: true
+  vpn_network:
+    external: true
+  cache_network:
+    external: true
