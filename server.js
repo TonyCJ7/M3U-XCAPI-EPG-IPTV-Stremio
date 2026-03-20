@@ -102,6 +102,7 @@ app.post('/api/prefetch', async (req, res) => {
                 signal: controller.signal,
                 headers: { 'User-Agent': 'IPTV-Stremio-Addon Prefetch/1.1' }
             });
+            console.log('Prefetch fetched', fetched.status);
         } finally {
             clearTimeout(timeout);
         }
@@ -119,6 +120,7 @@ app.post('/api/prefetch', async (req, res) => {
 
         await new Promise((resolve, reject) => {
             reader.on('data', (chunk) => {
+                console.log('Prefetch data', chunk.length);
                 received += chunk.length;
                 if (received <= PREFETCH_MAX_BYTES) {
                     chunks.push(chunk);
